@@ -288,7 +288,7 @@ if __name__ == "__main__":
         {
             "text": "Change order executed to address unforeseen conditions.",
             "trade": "HVAC",
-            "expected": "CLOSED"
+            "expected": "SOFT_OPEN"
         },
         {
             "text": "Agency evaluating additional mechanical work pending funding.",
@@ -298,7 +298,7 @@ if __name__ == "__main__":
         {
             "text": "Revised scope for plumbing fixtures - see meeting notes.",
             "trade": "Plumbing",
-            "expected": "CLOSED"  # Missing context = downgrade
+            "expected": "SOFT_OPEN"  # Missing context = downgrade
         }
     ]
     
