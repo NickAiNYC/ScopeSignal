@@ -1,0 +1,29 @@
+{
+  "updates": [
+    {
+      "id": "update_001",
+      "text": "Amendment 2 issued. See updated Attachment B.",
+      "trade": "Electrical"
+    },
+    {
+      "id": "update_002",
+      "text": "RFP issued for additional electrical work. Qualified vendors may submit pricing by March 15.",
+      "trade": "Electrical"
+    },
+    {
+      "id": "update_003",
+      "text": "Change order executed to address unforeseen conditions.",
+      "trade": "HVAC"
+    },
+    {
+      "id": "update_004",
+      "text": "Agency evaluating additional mechanical work pending funding.",
+      "trade": "HVAC"
+    },
+    {
+      "id": "update_005",
+      "text": "Revised scope for plumbing fixtures - see meeting notes.",
+      "trade": "Plumbing"
+    }
+  ]
+}

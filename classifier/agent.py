@@ -10,10 +10,12 @@ import os
 import json
 import time
 import hashlib
-from typing import Dict, Literal
+from typing import Dict, Literal, List, Optional
 from openai import OpenAI
 from dotenv import load_dotenv
 load_dotenv()
+
+from .cache import ResultCache
 
 # The hardened prompt - DO NOT MODIFY without documented reason
 SYSTEM_PROMPT = """You are a NYC construction subcontractor with 20+ years of field and bidding experience.
@@ -72,7 +74,7 @@ class ScopeSignalClassifier:
     Backend: DeepSeek (OpenAI-compatible API) - cost-effective alternative to Claude
     """
     
-    def __init__(self, api_key: str = None, max_retries: int = 3):
+    def __init__(self, api_key: str = None, max_retries: int = 3, enable_cache: bool = True, cache_dir: str = ".scopesignal_cache"):
         self.api_key = api_key or os.getenv("DEEPSEEK_API_KEY")
         if not self.api_key:
             raise ValueError("DEEPSEEK_API_KEY must be set in environment or passed directly")
@@ -84,6 +86,9 @@ class ScopeSignalClassifier:
         )
         self.max_retries = max_retries
         self.model = "deepseek-chat"  # Options: "deepseek-chat" or "deepseek-reasoner"
+        
+        # Initialize cache
+        self.cache = ResultCache(cache_dir=cache_dir) if enable_cache else None
     
     def _cache_key(self, update_text: str, trade: str) -> str:
         """
@@ -177,8 +182,14 @@ class ScopeSignalClassifier:
         
         user_message = f"Trade: {trade}\n\nProject Update:\n{update_text}"
         
-        # Generate cache key (not used yet, but ready for caching implementation)
+        # Generate cache key
         cache_key = self._cache_key(update_text, trade)
+        
+        # Check cache first
+        if self.cache:
+            cached_result = self.cache.get(cache_key)
+            if cached_result:
+                return cached_result
         
         for attempt in range(self.max_retries):
             try:
@@ -241,6 +252,10 @@ class ScopeSignalClassifier:
                     if any(word in reasoning_lower for word in ["unclear", "ambiguous", "missing", "vague", "uncertain"]):
                         result["_metadata"]["downgrade_reason"] = "ambiguous_language"
                 
+                # Cache the result
+                if self.cache:
+                    self.cache.set(cache_key, result)
+                
                 return result
                 
             except json.JSONDecodeError as e:
@@ -254,6 +269,80 @@ class ScopeSignalClassifier:
                 time.sleep(2 ** attempt)
         
         raise ClassificationError("Unexpected retry loop exit")
+    
+    def classify_batch(
+        self, 
+        updates: List[Dict[str, str]], 
+        show_progress: bool = True
+    ) -> List[Dict]:
+        """
+        Classify multiple updates efficiently with progress tracking.
+        
+        Args:
+            updates: List of dicts with 'text' and 'trade' keys
+            show_progress: Whether to print progress updates
+            
+        Returns:
+            List of classification results with added 'update_id' field
+            
+        Example:
+            updates = [
+                {"text": "Amendment 2 issued", "trade": "Electrical"},
+                {"text": "RFP posted", "trade": "HVAC"}
+            ]
+            results = classifier.classify_batch(updates)
+        """
+        results = []
+        total = len(updates)
+        cache_hits = 0
+        
+        if show_progress:
+            print(f"Processing {total} updates...")
+        
+        start_time = time.time()
+        
+        for i, update in enumerate(updates, 1):
+            if show_progress and i % 10 == 0:
+                elapsed = time.time() - start_time
+                rate = i / elapsed if elapsed > 0 else 0
+                eta = (total - i) / rate if rate > 0 else 0
+                print(f"  [{i}/{total}] {rate:.1f} updates/sec | ETA: {eta:.0f}s")
+            
+            try:
+                result = self.classify_update(
+                    update_text=update["text"],
+                    trade=update["trade"]
+                )
+                
+                # Track cache hits
+                if result.get("_metadata", {}).get("cache_hit"):
+                    cache_hits += 1
+                
+                # Add update ID if provided
+                if "id" in update:
+                    result["update_id"] = update["id"]
+                
+                results.append(result)
+                
+            except Exception as e:
+                # Include error in results rather than failing entire batch
+                error_result = {
+                    "error": str(e),
+                    "text": update["text"],
+                    "trade": update["trade"],
+                    "classification": "ERROR"
+                }
+                if "id" in update:
+                    error_result["update_id"] = update["id"]
+                results.append(error_result)
+        
+        elapsed = time.time() - start_time
+        
+        if show_progress:
+            print(f"✓ Completed {total} updates in {elapsed:.1f}s ({total/elapsed:.1f} updates/sec)")
+            print(f"  Cache hits: {cache_hits}/{total} ({cache_hits/total*100:.1f}%)")
+        
+        return results
 
 
 def classify_update(

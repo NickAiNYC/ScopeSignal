@@ -16,6 +16,9 @@ evaluation/results.json
 evaluation/*.json
 *.log
 
+# Cache
+.scopesignal_cache/
+
 # IDE
 .vscode/
 .idea/
