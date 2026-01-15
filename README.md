@@ -4,7 +4,9 @@
 
 This system applies veteran subcontractor judgment to public agency notices, filtering noise from opportunity. It's designed to minimize false positives—not to be smart, but to be useful.
 
-**Model-agnostic LLM backend** (currently configured for Anthropic Claude Sonnet 4).
+**Model-agnostic LLM backend** (currently configured for DeepSeek API).
+
+📚 **[Quick Start Guide](QUICKSTART.md)** | 📝 **[Changelog](CHANGELOG.md)** | 💻 **[Examples](examples/)**
 
 ---
 
