@@ -10,6 +10,9 @@ __pycache__/
 *$py.class
 *.so
 .Python
+*.egg-info/
+dist/
+build/
 
 # Results and outputs
 evaluation/results.json
@@ -19,13 +22,24 @@ evaluation/*.json
 # Cache
 .scopesignal_cache/
 
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-*
 
 # OS
 .DS_Store
 Thumbs.db
 .env
+
+# Build artifacts
+*.whl
+*.egg

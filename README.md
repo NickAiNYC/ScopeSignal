@@ -1,12 +1,18 @@
 # ScopeSignal
 
+[![Tests](https://github.com/NickAiNYC/ScopeSignal/workflows/Tests/badge.svg)](https://github.com/NickAiNYC/ScopeSignal/actions)
+[![Lint](https://github.com/NickAiNYC/ScopeSignal/workflows/Lint/badge.svg)](https://github.com/NickAiNYC/ScopeSignal/actions)
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 **Conservative classification of NYC construction project updates for subcontractors.**
 
 This system applies veteran subcontractor judgment to public agency notices, filtering noise from opportunity. It's designed to minimize false positives—not to be smart, but to be useful.
 
 **Model-agnostic LLM backend** (currently configured for DeepSeek API).
 
-📚 **[Quick Start Guide](QUICKSTART.md)** | 📝 **[Changelog](CHANGELOG.md)** | 💻 **[Examples](examples/)**
+📚 **[Quick Start Guide](QUICKSTART.md)** | 📝 **[Changelog](CHANGELOG.md)** | 💻 **[Examples](examples/)** | 🤝 **[Contributing](CONTRIBUTING.md)**
 
 ---
 
