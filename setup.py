@@ -21,11 +21,11 @@ def check_python_version():
 
 def check_api_key():
     """Verify API key is configured"""
-    key = os.getenv("ANTHROPIC_API_KEY")
+    key = os.getenv("DEEPSEEK_API_KEY")
     if not key:
-        print("❌ ANTHROPIC_API_KEY not set")
+        print("❌ DEEPSEEK_API_KEY not set")
         print("   1. Copy .env.example to .env")
-        print("   2. Add your API key from https://console.anthropic.com/settings/keys")
+        print("   2. Add your API key from https://platform.deepseek.com/api_keys")
         print("   3. Run: source .env (or set in your shell)")
         return False
     print("✓ API key configured")
@@ -35,11 +35,11 @@ def check_api_key():
 def check_dependencies():
     """Verify required packages are installed"""
     try:
-        import anthropic
-        print(f"✓ anthropic {anthropic.__version__}")
+        import openai
+        print(f"✓ openai {openai.__version__}")
         return True
     except ImportError:
-        print("❌ anthropic package not installed")
+        print("❌ openai package not installed")
         print("   Run: pip install -r requirements.txt")
         return False
 

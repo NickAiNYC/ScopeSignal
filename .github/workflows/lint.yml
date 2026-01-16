@@ -1,0 +1,38 @@
+name: Lint
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install black flake8 mypy
+        pip install -r requirements.txt
+    
+    - name: Check formatting with Black
+      run: |
+        black --check --diff classifier/ evaluation/ data/ tests/ cli.py dashboard.py
+    
+    - name: Lint with flake8
+      run: |
+        flake8 classifier/ evaluation/ data/ tests/ cli.py dashboard.py --max-line-length=100 --extend-ignore=E203,W503
+    
+    - name: Type check with mypy
+      run: |
+        mypy classifier/ evaluation/ data/ --ignore-missing-imports
+      continue-on-error: true

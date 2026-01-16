@@ -11,6 +11,7 @@ from pathlib import Path
 
 from classifier import ScopeSignalClassifier, ClassificationError
 from data import generate_batch, generate_adversarial_set
+from .metrics import ClassificationMetrics
 
 
 class EvaluationResults:
@@ -218,6 +219,13 @@ def run_evaluation(
     
     # Print summary
     results.print_summary()
+    
+    # Print enhanced metrics
+    print("\n" + "="*60)
+    print("ENHANCED METRICS")
+    print("="*60)
+    metrics = ClassificationMetrics(results.all_results)
+    metrics.print_report()
     
     # Save if requested
     if save_path:
