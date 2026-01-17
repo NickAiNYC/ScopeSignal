@@ -84,7 +84,7 @@ export default function VoiceCommandButton() {
                 <p className="text-sm text-blue-400 mb-2">{feedback}</p>
               )}
               {transcript && (
-                <p className="text-sm text-slate-300">"{transcript}"</p>
+                <p className="text-sm text-slate-300">&ldquo;{transcript}&rdquo;</p>
               )}
             </motion.div>
           )}
@@ -125,7 +125,7 @@ export default function VoiceCommandButton() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
         >
-          Say "Hey Command" to activate
+          Say &ldquo;Hey Command&rdquo; to activate
         </motion.p>
       </div>
     </div>

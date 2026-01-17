@@ -48,7 +48,7 @@ export function useVoiceCommand({ onResult, onEnd, onError }: UseVoiceCommandOpt
         setRecognition(recognitionInstance)
       }
     }
-  }, [onResult, onEnd, onError])
+  }, []) // Remove dependencies to prevent infinite loop
 
   const startListening = () => {
     if (recognition) {
