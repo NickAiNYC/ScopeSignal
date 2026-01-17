@@ -43,3 +43,16 @@ Thumbs.db
 # Build artifacts
 *.whl
 *.egg
+
+# Next.js
+.next/
+out/
+node_modules/
+*.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
