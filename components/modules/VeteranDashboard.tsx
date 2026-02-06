@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Construction, CheckCircle, AlertTriangle, XCircle, Filter, TrendingUp } from 'lucide-react'
+import { Construction, CheckCircle, AlertTriangle, XCircle, Filter, TrendingUp, Map as MapIcon } from 'lucide-react'
+import ProjectMap, { ProjectLocation } from './ProjectMap'
 
 interface ProjectUpdate {
   id: string
@@ -12,6 +13,8 @@ interface ProjectUpdate {
   confidence: number
   trade: string
   location: string
+  latitude?: number
+  longitude?: number
   feasibility_score: number
   can_bid: boolean
   compliance_readiness: {
@@ -25,6 +28,7 @@ interface ProjectUpdate {
 export default function VeteranDashboard() {
   const [projects, setProjects] = useState<ProjectUpdate[]>([])
   const [filteredProjects, setFilteredProjects] = useState<ProjectUpdate[]>([])
+  const [showMap, setShowMap] = useState(true)
   const [filters, setFilters] = useState({
     opportunityLevel: 'ALL',
     complianceReady: false,
@@ -50,6 +54,8 @@ export default function VeteranDashboard() {
         confidence: 85,
         trade: 'HVAC',
         location: 'Brooklyn, NY',
+        latitude: 40.6782,
+        longitude: -73.9442,
         feasibility_score: 85.0,
         can_bid: true,
         compliance_readiness: {
@@ -67,6 +73,8 @@ export default function VeteranDashboard() {
         confidence: 65,
         trade: 'Electrical',
         location: 'Manhattan, NY',
+        latitude: 40.7831,
+        longitude: -73.9712,
         feasibility_score: 39.0,
         can_bid: true,
         compliance_readiness: {
@@ -84,6 +92,8 @@ export default function VeteranDashboard() {
         confidence: 78,
         trade: 'Plumbing',
         location: 'Queens, NY',
+        latitude: 40.7282,
+        longitude: -73.7949,
         feasibility_score: 15.6,
         can_bid: false,
         compliance_readiness: {
@@ -101,6 +111,8 @@ export default function VeteranDashboard() {
         confidence: 92,
         trade: 'Electrical',
         location: 'Bronx, NY',
+        latitude: 40.8448,
+        longitude: -73.8648,
         feasibility_score: 0.0,
         can_bid: false,
         compliance_readiness: {
@@ -118,6 +130,8 @@ export default function VeteranDashboard() {
         confidence: 70,
         trade: 'HVAC',
         location: 'Staten Island, NY',
+        latitude: 40.5795,
+        longitude: -74.1502,
         feasibility_score: 42.0,
         can_bid: true,
         compliance_readiness: {
@@ -315,18 +329,57 @@ export default function VeteranDashboard() {
             <span>Show Only Compliant</span>
           </label>
 
+          <label className="flex items-center space-x-2 text-sm ml-4">
+            <input
+              type="checkbox"
+              className="rounded"
+              checked={showMap}
+              onChange={(e) => setShowMap(e.target.checked)}
+            />
+            <span className="flex items-center gap-1">
+              <MapIcon className="w-4 h-4" />
+              Show Map
+            </span>
+          </label>
+
           <span className="text-sm text-slate-400 ml-auto">
             Showing {filteredProjects.length} of {projects.length} projects
           </span>
         </div>
       </motion.div>
 
+      {/* NYC Opportunity Heat Map */}
+      {showMap && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <ProjectMap 
+            projects={filteredProjects.filter(p => p.latitude && p.longitude).map(p => ({
+              id: p.id,
+              title: p.title,
+              classification: p.classification,
+              trade: p.trade as 'Electrical' | 'HVAC' | 'Plumbing',
+              latitude: p.latitude!,
+              longitude: p.longitude!,
+              feasibility_score: p.feasibility_score,
+              confidence: p.confidence,
+              agency: p.agency,
+              location: p.location,
+              posted_date: p.posted_date,
+              can_bid: p.can_bid
+            }))}
+          />
+        </motion.div>
+      )}
+
       {/* Projects List */}
       <motion.div
         className="space-y-3"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
+        transition={{ delay: showMap ? 0.4 : 0.3 }}
       >
         {filteredProjects.map((project, index) => (
           <motion.div
