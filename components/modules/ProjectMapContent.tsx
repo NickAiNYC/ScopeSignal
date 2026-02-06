@@ -83,7 +83,7 @@ function HeatMapLayer({ projects }: { projects: ProjectLocation[] }) {
 
   useEffect(() => {
     // Dynamically import leaflet.heat
-    import('leaflet.heat').then((HeatLayer: any) => {
+    import('leaflet.heat').then((module: any) => {
       // Remove existing heat layer
       if (heatLayerRef.current) {
         map.removeLayer(heatLayerRef.current)
@@ -102,8 +102,11 @@ function HeatMapLayer({ projects }: { projects: ProjectLocation[] }) {
         return [project.latitude, project.longitude, intensity]
       })
 
+      // Get the heatLayer function from the module
+      const heatLayerFn = module.default || module
+      
       // Create heat layer with custom gradient
-      const heatLayer = (HeatLayer.default || HeatLayer)(heatData, {
+      const heatLayer = heatLayerFn(heatData, {
         radius: 25,
         blur: 15,
         maxZoom: 17,
@@ -117,6 +120,8 @@ function HeatMapLayer({ projects }: { projects: ProjectLocation[] }) {
 
       heatLayer.addTo(map)
       heatLayerRef.current = heatLayer
+    }).catch(err => {
+      console.warn('Failed to load heat map layer:', err)
     })
 
     // Cleanup
