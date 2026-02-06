@@ -138,6 +138,7 @@ import json
 from datetime import datetime, timedelta
 sys.path.insert(0, '.')
 from packages.compliance import FeasibilityScorer
+from packages.agents.opportunity.geocoder import NYCGeocoder
 
 # Read input
 input_data = json.loads(sys.stdin.read())
@@ -203,9 +204,13 @@ mock_projects = [
 
 # Calculate feasibility for each project
 scorer = FeasibilityScorer()
+geocoder = NYCGeocoder()
 results = []
 
 for project in mock_projects:
+    # Geocode the location
+    coords = geocoder.geocode_address(project["location"])
+    
     feasibility = scorer.calculate_feasibility(
         project,
         input_data['user_insurance'],
@@ -222,6 +227,8 @@ for project in mock_projects:
         "confidence": project["confidence"],
         "trade": project["_metadata"]["trade"],
         "location": project["location"],
+        "latitude": coords[0] if coords else 40.7128,
+        "longitude": coords[1] if coords else -74.0060,
         "posted_date": project["posted_date"],
         "feasibility_score": feasibility["feasibility_score"],
         "can_bid": feasibility["can_bid"],
