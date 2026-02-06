@@ -7,6 +7,7 @@ import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import { CheckCircle, AlertTriangle, XCircle, TrendingUp } from 'lucide-react'
+import { NYC_CENTER, OPPORTUNITY_COLORS, MAP_CONFIG } from '@/lib/constants/map'
 
 // Fix for default marker icons in React-Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -40,11 +41,12 @@ interface ProjectMapContentProps {
 
 // Custom marker icons based on classification
 const createCustomIcon = (classification: string, trade: string) => {
-  const color = classification === 'CONTESTABLE' 
-    ? '#10b981' // green
-    : classification === 'SOFT_OPEN' 
-    ? '#eab308' // yellow
-    : '#ef4444' // red
+  const colorMap: { [key: string]: string } = {
+    'CONTESTABLE': OPPORTUNITY_COLORS.CONTESTABLE,
+    'SOFT_OPEN': OPPORTUNITY_COLORS.SOFT_OPEN,
+    'CLOSED': OPPORTUNITY_COLORS.CLOSED
+  }
+  const color = colorMap[classification] || OPPORTUNITY_COLORS.CLOSED
 
   const tradeEmoji = trade === 'Electrical' 
     ? '⚡' 
@@ -107,14 +109,14 @@ function HeatMapLayer({ projects }: { projects: ProjectLocation[] }) {
       
       // Create heat layer with custom gradient
       const heatLayer = heatLayerFn(heatData, {
-        radius: 25,
-        blur: 15,
+        radius: MAP_CONFIG.HEAT_RADIUS,
+        blur: MAP_CONFIG.HEAT_BLUR,
         maxZoom: 17,
         max: 1.0,
         gradient: {
-          0.0: '#ef4444',  // Red for low intensity (CLOSED)
-          0.5: '#eab308',  // Yellow for medium (SOFT_OPEN)
-          1.0: '#10b981'   // Green for high intensity (CONTESTABLE)
+          0.0: OPPORTUNITY_COLORS.CLOSED,
+          0.5: OPPORTUNITY_COLORS.SOFT_OPEN,
+          1.0: OPPORTUNITY_COLORS.CONTESTABLE
         }
       })
 
@@ -156,7 +158,7 @@ function MarkerClusterLayer({
 
       // Create marker cluster group
       const markers = (L as any).markerClusterGroup({
-        maxClusterRadius: 50,
+        maxClusterRadius: MAP_CONFIG.CLUSTER_RADIUS,
         spiderfyOnMaxZoom: true,
         showCoverageOnHover: false,
         zoomToBoundsOnClick: true,
@@ -251,7 +253,9 @@ function MarkerClusterLayer({
 
             ${project.can_bid ? `
               <button 
-                onclick="alert('Starting compliance outreach for: ${project.title.replace(/'/g, "\\'")}');window.location.href='/veteran-dashboard'"
+                class="compliance-outreach-btn"
+                data-project-id="${project.id}"
+                data-project-title="${project.title.replace(/"/g, '&quot;')}"
                 style="
                   width: 100%;
                   padding: 8px;
@@ -282,6 +286,23 @@ function MarkerClusterLayer({
           className: 'custom-popup'
         })
 
+        // Add safe event handler for compliance button
+        marker.on('popupopen', () => {
+          const popupElement = marker.getPopup()?.getElement()
+          if (popupElement) {
+            const btn = popupElement.querySelector('.compliance-outreach-btn')
+            if (btn) {
+              btn.addEventListener('click', (e) => {
+                e.preventDefault()
+                const projectId = btn.getAttribute('data-project-id')
+                const projectTitle = btn.getAttribute('data-project-title')
+                alert(`Starting compliance outreach for: ${projectTitle}`)
+                window.location.href = '/veteran-dashboard'
+              })
+            }
+          }
+        })
+
         if (onProjectClick) {
           marker.on('click', () => onProjectClick(project))
         }
@@ -310,13 +331,10 @@ export default function ProjectMapContent({
   showMarkers,
   onProjectClick 
 }: ProjectMapContentProps) {
-  // NYC center coordinates
-  const nycCenter: [number, number] = [40.7128, -74.0060]
-
   return (
     <MapContainer
-      center={nycCenter}
-      zoom={11}
+      center={NYC_CENTER}
+      zoom={MAP_CONFIG.DEFAULT_ZOOM}
       style={{ width: '100%', height: '100%' }}
       className="z-0"
     >
